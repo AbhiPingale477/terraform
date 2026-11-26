@@ -1,5 +1,5 @@
 provider "aws" {
-    region = "ap-south-1"
+  region = "ap-south-1"
 }
 
 resource "aws_iam_role" "cluster2" {
@@ -23,32 +23,37 @@ resource "aws_iam_role" "cluster2" {
 
 resource "aws_iam_role_policy_attachment" "cluster_AmazonEKSClusterPolicy" {
   policy_arn = "arn:aws:iam::aws:policy/AmazonEKSClusterPolicy"
-  role       = aws_iam_role.cluster1.name
+  role       = aws_iam_role.cluster2.name
 }
-
 
 data "aws_vpc" "default" {
-    default = true
+  default = true
 }
-data "aws_subnets" "default"{
-    filter {
-        name = "vpc-id"
-        values = [data.aws_vpc.default.id]
-    }
+
+data "aws_subnets" "default" {
+  filter {
+    name   = "vpc-id"
+    values = [data.aws_vpc.default.id]
+  }
+  filter {
+    name   = "availability-zone"
+    values = ["ap-south-1a", "ap-south-1b"]
+  }
 }
 
 resource "aws_eks_cluster" "cluster2" {
-    name = "cluster2"
-    role_arn = aws_iam_role.cluster2.arn
-    access_config {
-        authentication_mode = "API"
-    }
-    version  = "1.35"
+  name     = "cluster2"
+  role_arn = aws_iam_role.cluster2.arn
+  access_config {
+    authentication_mode = "API"
+  }
+  version = "1.35"
 
-    vpc_config {
-        subnet_ids = data.aws_subnets.default.ids
-    }
-    depends_on = [
+  vpc_config {
+    subnet_ids = data.aws_subnets.default.ids
+  }
+
+  depends_on = [
     aws_iam_role_policy_attachment.cluster_AmazonEKSClusterPolicy
   ]
 }
