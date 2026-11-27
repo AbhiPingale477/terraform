@@ -185,4 +185,3 @@ resource "aws_eks_node_group" "worker_nodes" {
 
 output "update_kubeconfig" {
   value = "aws eks update-kubeconfig --region ap-south-1 --name ${aws_eks_cluster.cluster1.name}"
-}
