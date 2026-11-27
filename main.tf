@@ -3,7 +3,7 @@ provider "aws" {
 }
 
 locals {
-  cluster_name = "cluster1"
+  cluster_name = "cluster"
   k8s_version  = "1.35" # must match a version Canonical publishes an Ubuntu EKS AMI for (see note below)
   ubuntu_ver   = "24.04"
 }
@@ -11,7 +11,7 @@ locals {
 ########################
 # Cluster IAM role
 ########################
-resource "aws_iam_role" "cluster1" {
+resource "aws_iam_role" "cluster" {
   name = "eks-cluster-example987"
 
   assume_role_policy = jsonencode({
@@ -30,7 +30,7 @@ resource "aws_iam_role" "cluster1" {
 
 resource "aws_iam_role_policy_attachment" "cluster_AmazonEKSClusterPolicy" {
   policy_arn = "arn:aws:iam::aws:policy/AmazonEKSClusterPolicy"
-  role       = aws_iam_role.cluster1.name
+  role       = aws_iam_role.cluster.name
 }
 
 ########################
@@ -50,9 +50,9 @@ data "aws_subnets" "default" {
 ########################
 # EKS cluster
 ########################
-resource "aws_eks_cluster" "cluster1" {
+resource "aws_eks_cluster" "cluster" {
   name     = local.cluster_name
-  role_arn = aws_iam_role.cluster1.arn
+  role_arn = aws_iam_role.cluster.arn
   version  = local.k8s_version
 
   access_config {
@@ -154,7 +154,7 @@ resource "aws_launch_template" "ubuntu_nodes" {
 # Managed node group (Ubuntu)
 ########################
 resource "aws_eks_node_group" "worker_nodes" {
-  cluster_name    = aws_eks_cluster.cluster1.name
+  cluster_name    = aws_eks_cluster.cluster.name
   node_group_name = "worker-nodes-ubuntu"
   node_role_arn   = aws_iam_role.worker_nodes.arn
   subnet_ids      = data.aws_subnets.default.ids
